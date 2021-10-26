@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE xml>
+<project default="create_run_jar" name="Create Runnable Jar for Project CacheASM">
+	<property name="dir.ws" value="${user.home}/eclipse-workspaces"/>
+	<property name="jarfile" value="${basedir}/zip/builder/buildJars/CacheASM.jar"/>
+	<property name="git" value="${dir.ws}/Git"/>
+	<property name="libs" value="${git}/libs"/>
+	<target name="create_run_jar">
+		<jar destfile="${jarfile}" filesetmanifest="mergewithoutmain">
+			<manifest>
+				<attribute name="Main-Class" value="org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader"/>
+				<attribute name="Rsrc-Main-Class" value="de.tinycodecrank.asm.cache.DecoratorCache"/>
+				<attribute name="Class-Path" value="."/>
+				<attribute name="Rsrc-Class-Path" value="./ asm-9.2.jar asm-tree-9.2.jar"/>
+				<!-- <attribute name="Can-Redefine-Classes" value="true"/>
+				<attribute name="Can-Retransform-Classes" value="true"/>
+				<attribute name="Can-Set-Native-Method-Prefix" value="false"/> -->
+			</manifest>
+			<zipfileset dir="${libs}/CacheASM/libs" includes="asm-9.2.jar asm-tree-9.2.jar"/>
+			<zipfileset src="${libs}/CacheASM/libs/jar-in-jar-loader.zip"/>
+			<fileset dir="${libs}/CacheASM/bin"/>
+			<fileset dir="${libs}/Cache/bin" excludes="module-info.class"/>
+			<fileset dir="${libs}/Collections/bin" excludes="module-info.class"/>
+			<fileset dir="${libs}/mathUtils/bin" excludes="module-info.class"/>
+			<fileset dir="${libs}/Monads/bin" excludes="module-info.class"/>
+			<fileset dir="${libs}/Iterator/bin" excludes="module-info.class"/>
+			<fileset dir="${libs}/Functional/bin" excludes="module-info.class"/>
+			<fileset dir="${libs}/Sort/bin" excludes="module-info.class"/>
+			<fileset dir="${libs}/System/bin" excludes="module-info.class"/>
+			<fileset dir="${libs}/Concurrent/bin" excludes="module-info.class"/>
+			<fileset dir="${libs}/Bounded/bin" excludes="module-info.class"/>
+		</jar>
+	</target>
+	
+	<property name="zipFile" value="${basedir}/build/CacheASM.zip"/>
+	
+	<target name="package processor">
+		<exec executable="rm">
+			<arg value="-f"/>
+			<arg value="-I"/>
+			<arg value="${zipFile}"/>
+		</exec>
+		<exec dir="${basedir}/zip/" executable="zip">
+			<arg value="-q"/>
+			<arg value="-r"/>
+			<arg value="${zipFile}"/>
+			<arg value="."/>
+			<arg value="-i"/>
+			<arg value="*"/>
+		</exec>
+	</target>
+	
+	<target name="deploy processor">
+		<exec executable="unzip">
+			<arg value="-qq"/>
+			<arg value="-u"/>
+			<arg value="-o"/>
+			<arg value="${zipFile}"/>
+			<arg value="-d"/>
+			<arg value="${eclipse.home}"/>
+		</exec>
+	</target>
+</project>
