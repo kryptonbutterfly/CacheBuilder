@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/Cache"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/Collections"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/Functional"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/mathUtils"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/Monads"/>
+	<classpathentry kind="lib" path="libs/lombok.jar"/>
+	<classpathentry kind="lib" path="libs/asm-9.2.jar" sourcepath="libs/asm-9.2-sources.jar"/>
+	<classpathentry kind="lib" path="libs/asm-tree-9.2.jar" sourcepath="libs/asm-tree-9.2-sources.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/System"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
