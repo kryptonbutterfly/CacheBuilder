@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project default="create_run_jar" name="Create Runnable Jar for Project CacheASM">
+    <!--this file was created by Eclipse Runnable JAR Export Wizard-->
+    <!--ANT 1.7 is required                                        -->
+    <!--define folder properties-->
+    <property name="dir.buildfile" value="../build"/>
+	<property name="dir.libs" value="/home/christian/eclipse-workspaces/Git/libs"/>
+    <target name="create_run_jar">
+        <jar destfile="${dir.buildfile}/CacheASM.jar" filesetmanifest="mergewithoutmain">
+            <manifest>
+                <attribute name="Main-Class" value="de.tinycodecrank.asm.cache.DecoratorCache"/>
+                <attribute name="Class-Path" value="."/>
+            	<attribute name="Premain-class" value="de.tinycodecrank.agent.Agent"/>
+            	<attribute name="Agent-class" value="de.tinycodecrank.agent.Agent"/>
+            	<attribute name="Can-Redefine-Classes" value="true"/>
+            	<attribute name="Can-Retransform-Classes" value="true"/>
+            	<attribute name="Can-Set-Native-Method-Prefix" value="false"/>
+            </manifest>
+            <fileset dir="${dir.libs}/CacheASM/bin"/>
+            <fileset dir="${dir.libs}/Cache/bin"/>
+            <fileset dir="${dir.libs}/Collections/bin"/>
+            <fileset dir="${dir.libs}/mathUtils/bin"/>
+            <fileset dir="${dir.libs}/Monads/bin"/>
+            <fileset dir="${dir.libs}/Iterator/bin"/>
+            <fileset dir="${dir.libs}/Functional/bin"/>
+            <fileset dir="${dir.libs}/Sort/bin"/>
+            <zipfileset excludes="META-INF/*.SF, module-info.class" src="${dir.libs}/CacheASM/libs/asm-9.2.jar"/>
+            <zipfileset excludes="META-INF/*.SF, module-info.class" src="${dir.libs}/CacheASM/libs/asm-tree-9.2.jar"/>
+            <fileset dir="${dir.libs}/System/bin"/>
+            <fileset dir="${dir.libs}/Concurrent/bin"/>
+        </jar>
+    </target>
+</project>

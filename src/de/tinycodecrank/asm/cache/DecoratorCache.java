@@ -49,28 +49,40 @@ public class DecoratorCache
 {
 	public static void main(String[] args)
 	{
+		File binDir;
 		if (args.length > 0)
 		{
-			File res = new File(args[0]);
-			if (res.isDirectory())
+			binDir = new File(args[0]);
+		}
+		else
+		{
+			binDir = new File(".");
+		}
+		if (binDir.isDirectory())
+		{
+			new FileSystemUtils().performRecursive(binDir, f ->
 			{
-				new FileSystemUtils().performRecursive(res, f ->
+				if (f.isFile())
 				{
-					if (f.isFile())
-					{
-						adapt(Cache.class, f);
-					}
-					return true;
-				}, Boolean::logicalAnd);
-				
-			}
-			else
-			{
-				adapt(Cache.class, res);
-			}
+					adapt(Cache.class, f);
+				}
+				return true;
+			}, Boolean::logicalAnd);
+			
+		}
+		else
+		{
+			adapt(Cache.class, binDir);
 		}
 	}
 	
+	/**
+	 * @param annotation
+	 *            the annotation to search for
+	 * @param reader
+	 *            the class reader
+	 * @return the adapted Opt<ClassNode> or Opt.empty() if nothing changed.
+	 */
 	@SneakyThrows
 	public static Opt<ClassNode> adapt(Class<?> annotation, ClassReader reader)
 	{
