@@ -1,10 +1,8 @@
 #!/bin/bash
 
-buildJarsDir=/home/christian/eclipse-photon/builder/buildJars
-buildScriptsDir=/home/christian/eclipse-photon/builder/buildSh
+eclipseInstallDir=$1
+zipFile=$2
 
-mkdir -p $buildJarsDir
-mkdir -p $buildScriptsDir
+# echo $zipFile -d $eclipseInstallDir
 
-cp ../build/CacheASM.jar $buildJarsDir
-cp CacheASM.sh $buildScriptsDir
+unzip -qq $zipFile -d $eclipseInstallDir

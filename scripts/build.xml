@@ -3,7 +3,7 @@
     <!--this file was created by Eclipse Runnable JAR Export Wizard-->
     <!--ANT 1.7 is required                                        -->
     <!--define folder properties-->
-    <property name="dir.buildfile" value="../build"/>
+    <property name="dir.buildfile" value="../zip/builder/buildJars"/>
 	<property name="dir.libs" value="/home/christian/eclipse-workspaces/Git/libs"/>
     <target name="create_run_jar">
         <jar destfile="${dir.buildfile}/CacheASM.jar" filesetmanifest="mergewithoutmain">

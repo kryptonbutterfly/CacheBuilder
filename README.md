@@ -1,34 +1,42 @@
 # CacheASM
 
-ByteCode manipulator used to decorate methods using @Cache annotations.
+ByteCode manipulator used to decorate methods using **@Cache** annotations.
 
 ## Install
 
-create the following directories in your eclipse installation directory:
-```shell
-builder/buildJars
-builder/buildSh
-```
-```shell
-copy CacheASM.jar to builder/buildJars
-copy CacheASM.sh to builder/buildSh
-```
+extract **CacheASM.zip** in your <span style="color:#00aaee">eclipse install directory</span>.
+
+![](md/icons/eclipse-install-directory.png)
 
 ##Project Setup
 
-- Navigate to: Project->Properties->Builders
-- click New
-- select "Program"
-- press OK
-- name your Builder CacheASM
-- in Location enter the path to CacheASM.sh
-- in Working Directory enter the path of your projects bin folder.
-- open the "Build Options" Tab
-- select the CheckBoxes:
-    - Allocate Console
-    - After a "Clean"
-    - During manual builds
-    - During auto builds
-- click "Apply"
-- click "OK"
-- click "Apply and Close"
+#### Import launch config into workspace
+
+- click ![File](md/icons/mnFile.png)
+- click ![Import…](md/icons/mnImport.png)
+- select ![Run/Debug ➜ Launch Configuration](md/icons/Run_Debug-Launch_Configuration.png)
+- click ![Next >](md/icons/Next_>.png)
+- click ![Browse](md/icons/Browse.png)
+- navigate to </br>!["eclipse install dir"/builder/launch-configs](md/icons/BrowseLaunchConfig.png)
+- click ![Open](md/icons/Open.png)
+- highlight **launch-config** select **Cache.launch**
+  </br>![](md/icons/ImportSelectLaunchconfig.png)
+- click ![Finish](md/icons/Finish.png)
+
+#### Setup launch config as project builder
+- right click your project
+- select ![properties](md/icons/mnProperties.png)
+- select ![Builders](md/icons/Builder.png)
+- click ![Import…](md/icons/btnImport.png)
+- select ![Cache](md/icons/chooseLaunchConfig.png)
+- click ![OK](md/icons/btnOK.png)
+- click ![Edit…](md/icons/btnEdit.png)
+- open the Tab ![Build Options](md/icons/BuildOptions.png)
+- select the **CheckBoxes**:
+    - ![Allocate Console](md/icons/check_AllocateConsole.png)
+    - ![After a "Clean"](md/icons/checkAfterClean.png)
+    - ![During manual builds](md/icons/checkManualBuilds.png)
+    - ![During auto builds](md/icons/checkAutoBuilds.png)
+- click ![Apply](md/icons/btnApply.png)
+- click ![OK](md/icons/btnOK.png)
+- click ![Apply and Close](md/icons/btnApplyAndClose.png)
