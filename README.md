@@ -4,26 +4,27 @@ ByteCode manipulator used to decorate methods using **@Cache** annotations.
 
 ## Install
 
-extract **CacheASM.zip** in your <span style="color:#00aaee">eclipse install directory</span>.
+extract **CacheASM.zip** in your <span style="color:#00aaee">**eclipse install directory**</span>.
 
 ![](md/icons/eclipse-install-directory.png)
 
 ##Project Setup
 
-#### Import launch config into workspace
+### Import launch config into workspace
 
 - click ![File](md/icons/mnFile.png)
 - click ![Import…](md/icons/mnImport.png)
 - select ![Run/Debug ➜ Launch Configuration](md/icons/Run_Debug-Launch_Configuration.png)
 - click ![Next >](md/icons/Next_>.png)
 - click ![Browse](md/icons/Browse.png)
-- navigate to </br>!["eclipse install dir"/builder/launch-configs](md/icons/BrowseLaunchConfig.png)
+- navigate to **<span style="color:#00aaee">eclipse install directory</span>/builder/launch-configs**
+  </br>!["eclipse install directory"/builder/launch-configs](md/icons/BrowseLaunchConfig.png)
 - click ![Open](md/icons/Open.png)
 - highlight **launch-config** select **Cache.launch**
   </br>![](md/icons/ImportSelectLaunchconfig.png)
 - click ![Finish](md/icons/Finish.png)
 
-#### Setup launch config as project builder
+### Setup launch config as project builder
 - right click your project
 - select ![properties](md/icons/mnProperties.png)
 - select ![Builders](md/icons/Builder.png)
