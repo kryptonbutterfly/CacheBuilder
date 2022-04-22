@@ -5,4 +5,4 @@ zipFile=$2
 
 # echo $zipFile -d $eclipseInstallDir
 
-unzip -qq $zipFile -d $eclipseInstallDir
+unzip -qq -o $zipFile -d $eclipseInstallDir
