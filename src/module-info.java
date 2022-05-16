@@ -1,7 +1,5 @@
 module CacheASM
 {
-	// exports de.tinycodecrank.asm.cache;
-
 	requires transitive Cache;
 	requires Collections;
 	requires Functional;
