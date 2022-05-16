@@ -1,12 +1,12 @@
 package de.tinycodecrank.asm.cache;
 
-import static de.tinycodecrank.math.utils.range.Range.*;
-import static org.objectweb.asm.Opcodes.*;
+import static de.tinycodecrank.math.utils.range.Range.range;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.function.Function;
 
+import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AnnotationNode;
 import org.objectweb.asm.tree.ClassNode;
@@ -21,24 +21,21 @@ import org.objectweb.asm.tree.VarInsnNode;
 import de.tinycodecrank.cache.CacheConstants;
 import de.tinycodecrank.collections.data.Tuple;
 import de.tinycodecrank.monads.Opt;
-import lombok.SneakyThrows;
-import lombok.val;
 
-public class ComponentWriter
+public class ComponentWriter implements Opcodes
 {
-	@SneakyThrows
-	public static Tuple<Type, Integer> getCacheSpecFromAnnotation(AnnotationNode node)
+	public static Tuple<Type, Integer> getCacheSpecFromAnnotation(AnnotationNode node) throws ClassNotFoundException
 	{
-		String	cacheField		= "cache";
-		String	capacityField	= "capacity";
-		Type	cacheType		= Type.getType(CacheConstants.DEFAULT_CACHE);
-		int		capacity		= CacheConstants.DEFAULT_CAPACITY;
-		int		count			= node.values.size() / 2;
+		String cacheField = "cache";
+		String capacityField = "capacity";
+		Type cacheType = Type.getType(CacheConstants.DEFAULT_CACHE);
+		int capacity = CacheConstants.DEFAULT_CAPACITY;
+		int count = node.values.size() / 2;
 		for (int i : range(count))
 		{
-			int		index	= i * 2;
-			Object	name	= node.values.get(index);
-			Object	value	= node.values.get(index + 1);
+			int index = i * 2;
+			Object name = node.values.get(index);
+			Object value = node.values.get(index + 1);
 			if (cacheField.equals(name))
 			{
 				if (value instanceof Type)
@@ -54,12 +51,11 @@ public class ComponentWriter
 				}
 			}
 		}
-		boolean	hasCapacity	= false;
-		val		cacheClass	= Class.forName(cacheType.getClassName());
-		outer:
-		for (val constr : cacheClass.getConstructors())
+		boolean hasCapacity = false;
+		final var cacheClass = Class.forName(cacheType.getClassName());
+		outer: for (final var constr : cacheClass.getConstructors())
 		{
-			for (val param : constr.getParameters())
+			for (final var param : constr.getParameters())
 			{
 				if (int.class == param.getType())
 				{
@@ -72,61 +68,46 @@ public class ComponentWriter
 		{
 			capacity = -1;
 		}
-		
+
 		return new Tuple<>(cacheType, capacity);
 	}
-	
+
 	public static MethodNode getOrCreateInitializer(ClassNode node, boolean isStatic)
 	{
-		val	INIT		= isStatic ? "<clinit>" : "<init>";
-		val	matches		= findMethod(node, INIT);
-		int	visibility	= isStatic
-			? 0
+		final var INIT = isStatic ? "<clinit>" : "<init>";
+		final var matches = findMethod(node, INIT);
+		int visibility = isStatic ? 0
 				: node.access & ACC_PUBLIC | node.access & ACC_PROTECTED | node.access & ACC_PRIVATE;
-		
-		return Opt.of(matches)
-			.filter(m -> !m.isEmpty())
-			.map(m -> m.get(0))
-			.get(() ->
+
+		return Opt.of(matches).filter(m -> !m.isEmpty()).map(m -> m.get(0)).get(() ->
+		{
+			MethodNode init = new MethodNode((isStatic ? ACC_STATIC : 0) | visibility, INIT, "()V", null, null);
+			node.methods.add(0, init);
+			if (!isStatic)
 			{
-				MethodNode init = new MethodNode(
-					(isStatic ? ACC_STATIC : 0) | visibility,
-					INIT,
-					"()V",
-					null,
-					null);
-				node.methods.add(0, init);
-				if (!isStatic)
-				{
-					LocalVariableNode instance = new LocalVariableNode(
-						"this",
-						node.signature,
-						null,
-						new LabelNode(),
-						new LabelNode(),
-						0);
-					init.localVariables.add(instance);
-					init.instructions.add(instance.start);
-					init.instructions.add(new VarInsnNode(ALOAD, instance.index));
-					init.instructions
-						.add(new MethodInsnNode(INVOKESPECIAL, node.superName, "<init>", fDesc("V")));
-					init.instructions.add(new InsnNode(RETURN));
-					init.instructions.add(instance.end);
-				}
-				else
-				{
-					init.instructions.add(new InsnNode(RETURN));
-				}
-				return init;
-			});
+				LocalVariableNode instance = new LocalVariableNode("this", node.signature, null, new LabelNode(),
+						new LabelNode(), 0);
+				init.localVariables.add(instance);
+				init.instructions.add(instance.start);
+				init.instructions.add(new VarInsnNode(ALOAD, instance.index));
+				init.instructions.add(new MethodInsnNode(INVOKESPECIAL, node.superName, "<init>", fDesc("V")));
+				init.instructions.add(new InsnNode(RETURN));
+				init.instructions.add(instance.end);
+			}
+			else
+			{
+				init.instructions.add(new InsnNode(RETURN));
+			}
+			return init;
+		});
 	}
-	
+
 	private static ArrayList<MethodNode> findMethod(ClassNode node, String methodName)
 	{
-		val matches = new ArrayList<MethodNode>();
+		final var matches = new ArrayList<MethodNode>();
 		if (node.methods != null)
 		{
-			for (val method : node.methods)
+			for (final var method : node.methods)
 			{
 				if (methodName.equals(method.name))
 				{
@@ -136,12 +117,12 @@ public class ComponentWriter
 		}
 		return matches;
 	}
-	
+
 	public static Opt<LocalVariableNode> findLocal(MethodNode node, String name)
 	{
 		if (node.localVariables != null)
 		{
-			for (val local : node.localVariables)
+			for (final var local : node.localVariables)
 			{
 				if (name.equals(local.name))
 				{
@@ -151,12 +132,12 @@ public class ComponentWriter
 		}
 		return Opt.empty();
 	}
-	
+
 	public static String toDesc(Class<?> clazz)
 	{
 		return toDesc(toInternal(clazz));
 	}
-	
+
 	public static String toDesc(String name)
 	{
 		name = "L" + name;
@@ -166,17 +147,17 @@ public class ComponentWriter
 		}
 		return name + ";";
 	}
-	
+
 	public static String toInternal(Class<?> clazz)
 	{
 		return toInternal(clazz.getCanonicalName());
 	}
-	
+
 	private static String toInternal(String clazz)
 	{
 		return clazz.replace('.', '/');
 	}
-	
+
 	public static String fDesc(Object ret, Object... params)
 	{
 		final Function<Object, String> toDescriptor = (obj) ->
@@ -190,7 +171,7 @@ public class ComponentWriter
 				return (String) obj;
 			}
 		};
-		
+
 		StringBuilder sb = new StringBuilder();
 		sb.append("(");
 		Arrays.stream(params).map(toDescriptor).forEach(sb::append);
@@ -198,11 +179,11 @@ public class ComponentWriter
 		sb.append(toDescriptor.apply(ret));
 		return sb.toString();
 	}
-	
+
 	public static String generateUniqueName(Iterable<?> iterable, String name)
 	{
 		int index = 0;
-		for (val element : iterable)
+		for (final var element : iterable)
 		{
 			if (element instanceof MethodNode)
 			{
