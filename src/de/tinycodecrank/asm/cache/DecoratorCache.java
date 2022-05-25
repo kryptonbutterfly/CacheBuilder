@@ -62,6 +62,7 @@ public class DecoratorCache implements Opcodes
 			{
 				if (f.isFile())
 				{
+					System.out.println("scanning content: %s".formatted(f.getAbsolutePath()));
 					return adapt(Cache.class, f);
 				}
 				return true;
@@ -151,7 +152,7 @@ public class DecoratorCache implements Opcodes
 			final var	SPEC			= getCacheSpecFromAnnotation(annotation);
 			final var	originalName	= original.name;
 			
-			original.name = generateUniqueName(classNode.methods, "ω" + original.name + "$");
+			original.name = generateUniqueMethodName(classNode, "ω" + original.name + "$");
 			MethodNode addWrapped = generateWrapped(classNode, original, originalName);
 			
 			FieldNode cacheField = createCache(classNode, addWrapped, SPEC);
@@ -204,7 +205,7 @@ public class DecoratorCache implements Opcodes
 		Type		returnType	= Type.getReturnType(original.desc);
 		final var	wrapped		= new MethodNode(
 			access,
-			generateUniqueName(classNode.methods, "¢" + originalName),
+			generateUniqueMethodName(classNode, "¢" + originalName),
 			fDesc(returnType.getDescriptor(), Object[].class),
 			null,
 			null);
@@ -317,18 +318,8 @@ public class DecoratorCache implements Opcodes
 			access |= ACC_STATIC;
 		}
 		
-		// calculate field name;
-		String	fieldName	= function.name + "$";
-		int		index		= 0;
-		
-		for (FieldNode field : classNode.fields)
-		{
-			if (field.name.startsWith(fieldName))
-			{
-				index++;
-			}
-		}
-		FieldNode field = new FieldNode(access, fieldName + index, SPEC.first().getDescriptor(), null, null);
+		String		fieldName	= ComponentWriter.generateUniqueFieldName(classNode, function.name);
+		FieldNode	field		= new FieldNode(access, fieldName, SPEC.first().getDescriptor(), null, null);
 		classNode.fields.add(field);
 		
 		MethodNode	init	= getOrCreateInitializer(classNode, isStatic);
@@ -529,13 +520,14 @@ public class DecoratorCache implements Opcodes
 	{
 		ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
 		classNode.accept(cw);
-		
-		if (classFile.getParentFile().mkdirs())
+		final var parentFolder = classFile.getParentFile();
+		if (parentFolder.exists() || parentFolder.mkdirs())
 		{
 			try (DataOutputStream oStream = new DataOutputStream(new FileOutputStream(classFile)))
 			{
 				oStream.write(cw.toByteArray());
 				oStream.flush();
+				System.out.println("adapted: %s".formatted(classFile.getCanonicalPath()));
 				return true;
 			}
 			catch (IOException e)
