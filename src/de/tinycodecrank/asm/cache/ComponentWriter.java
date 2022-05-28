@@ -6,74 +6,63 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AnnotationNode;
 import org.objectweb.asm.tree.ClassNode;
+import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.LabelNode;
 import org.objectweb.asm.tree.LocalVariableNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
+import org.objectweb.asm.tree.TypeInsnNode;
 import org.objectweb.asm.tree.VarInsnNode;
 
 import de.tinycodecrank.cache.CacheConstants;
-import de.tinycodecrank.collections.data.Tuple;
 import de.tinycodecrank.monads.Opt;
 
 public class ComponentWriter implements Opcodes
 {
-	public static Tuple<Type, Integer> getCacheSpecFromAnnotation(AnnotationNode node) throws ClassNotFoundException
+	static record CacheSpec(Type cacheType, int capacity)
+	{}
+	
+	static CacheSpec getCacheSpecFromAnnotation(AnnotationNode node) throws ClassNotFoundException
 	{
-		String	cacheField		= "cache";
-		String	capacityField	= "capacity";
-		Type	cacheType		= Type.getType(CacheConstants.DEFAULT_CACHE);
-		int		capacity		= CacheConstants.DEFAULT_CAPACITY;
-		int		count			= node.values.size() / 2;
-		for (int i : range(count))
+		final var	cacheField		= "cache";
+		final var	capacityField	= "capacity";
+		var			cacheType		= Type.getType(CacheConstants.DEFAULT_CACHE);
+		int			capacity		= CacheConstants.DEFAULT_CAPACITY;
+		
+		for (int index : range(0, node.values.size(), 2))
 		{
-			int		index	= i * 2;
-			Object	name	= node.values.get(index);
-			Object	value	= node.values.get(index + 1);
-			if (cacheField.equals(name))
+			final var	name	= node.values.get(index);
+			final var	value	= node.values.get(index + 1);
+			if (cacheField.equals(name) && value instanceof Type)
 			{
-				if (value instanceof Type)
-				{
-					cacheType = (Type) value;
-				}
+				cacheType = (Type) value;
 			}
-			else if (capacityField.equals(name))
+			else if (capacityField.equals(name) && value instanceof Integer)
 			{
-				if (value instanceof Integer)
-				{
-					capacity = (int) value;
-				}
+				capacity = (int) value;
 			}
 		}
-		boolean		hasCapacity	= false;
-		final var	cacheClass	= Class.forName(cacheType.getClassName());
-		outer:
-		for (final var constr : cacheClass.getConstructors())
-		{
-			for (final var param : constr.getParameters())
-			{
-				if (int.class == param.getType())
-				{
-					hasCapacity = true;
-					break outer;
-				}
-			}
-		}
+		final var cacheClass = Class.forName(cacheType.getClassName());
+		
+		final boolean hasCapacity = Arrays.stream(cacheClass.getConstructors())
+			.flatMap(c -> Arrays.stream(c.getParameters()))
+			.anyMatch(param -> int.class == param.getType());
+		
 		if (!hasCapacity)
 		{
 			capacity = -1;
 		}
-		
-		return new Tuple<>(cacheType, capacity);
+		return new CacheSpec(cacheType, capacity);
 	}
 	
-	public static MethodNode getOrCreateInitializer(ClassNode node, boolean isStatic)
+	static MethodNode getOrCreateInitializer(ClassNode node, boolean isStatic)
 	{
 		final var	INIT		= isStatic ? "<clinit>" : "<init>";
 		final var	matches		= findMethod(node, INIT);
@@ -111,53 +100,51 @@ public class ComponentWriter implements Opcodes
 	
 	private static ArrayList<MethodNode> findMethod(ClassNode node, String methodName)
 	{
-		final var matches = new ArrayList<MethodNode>();
-		if (node.methods != null)
-		{
-			for (final var method : node.methods)
-			{
-				if (methodName.equals(method.name))
-				{
-					matches.add(method);
-				}
-			}
-		}
-		return matches;
+		return Opt.of(node.methods)
+			.map(
+				methods -> methods.stream()
+					.filter(m -> m.name.equals(methodName))
+					.collect(Collectors.toCollection(ArrayList::new)))
+			.get(ArrayList::new);
 	}
 	
-	public static Opt<LocalVariableNode> findLocal(MethodNode node, String name)
+	static Opt<LocalVariableNode> findLocal(MethodNode node, String name)
 	{
-		if (node.localVariables != null)
-		{
-			for (final var local : node.localVariables)
-			{
-				if (name.equals(local.name))
-				{
-					return Opt.of(local);
-				}
-			}
-		}
-		return Opt.empty();
+		return Opt.of(node.localVariables)
+			.map(
+				vars -> vars.stream()
+					.filter(l -> l.name.equals(name))
+					.findAny())
+			.flatmap(Opt::convert);
 	}
 	
-	public static String toDesc(Class<?> clazz)
+	static String toDesc(Class<?> clazz)
 	{
 		return toDesc(toInternal(clazz));
 	}
 	
-	public static String toDesc(String name)
+	static String toDesc(String name)
 	{
-		name = "L" + name;
+		final var sb = new StringBuilder();
 		while (name.endsWith("[]"))
 		{
-			name = "[" + name.substring(0, name.length() - 2);
+			sb.append("[");
+			name = name.substring(0, name.length() - 2);
 		}
-		return name + ";";
+		return "%sL%s;".formatted(sb, name);
 	}
 	
-	public static String toInternal(Class<?> clazz)
+	static String toInternal(Class<?> clazz)
 	{
-		return toInternal(clazz.getCanonicalName());
+		final var	name		= new StringBuilder(clazz.getPackageName()).append(".");
+		var			innerHost	= clazz;
+		var			outerHost	= innerHost;
+		while ((outerHost = innerHost.getNestHost()) != innerHost)
+		{
+			innerHost = outerHost;
+			name.append(outerHost.getSimpleName()).append("$");
+		}
+		return toInternal(name.append(clazz.getSimpleName()).toString());
 	}
 	
 	private static String toInternal(String clazz)
@@ -165,34 +152,23 @@ public class ComponentWriter implements Opcodes
 		return clazz.replace('.', '/');
 	}
 	
-	public static String fDesc(Object ret, Object... params)
+	static String fDesc(Object ret, Object... params)
 	{
-		final Function<Object, String> toDescriptor = (obj) ->
-		{
-			if (obj instanceof Class<?>)
-			{
-				return toDesc((Class<?>) obj);
-			}
-			else
-			{
-				return (String) obj;
-			}
-		};
+		final Function<Object, String> toDescriptor = obj -> obj instanceof Class<?>
+			? toDesc((Class<?>) obj)
+				: (String) obj;
 		
-		StringBuilder sb = new StringBuilder();
-		sb.append("(");
+		StringBuilder sb = new StringBuilder("(");
 		Arrays.stream(params).map(toDescriptor).forEach(sb::append);
-		sb.append(")");
-		sb.append(toDescriptor.apply(ret));
-		return sb.toString();
+		return sb.append(")").append(toDescriptor.apply(ret)).toString();
 	}
 	
-	public static String generateUniqueMethodName(ClassNode node, String name)
+	static String generateUniqueMethodName(ClassNode node, String name)
 	{
 		return generateUnique(ComponentWriter::isUniqueMethodName, node, name);
 	}
 	
-	public static String generateUniqueFieldName(ClassNode node, String name)
+	static String generateUniqueFieldName(ClassNode node, String name)
 	{
 		return generateUnique(ComponentWriter::isUniqueFieldName, node, name);
 	}
@@ -202,24 +178,44 @@ public class ComponentWriter implements Opcodes
 		String	result;
 		int		index	= 0;
 		do
-		{
 			result = name + Integer.toHexString(index++);
-		}
 		while (!unique.test(node, result));
 		return result;
 	}
 	
 	private static boolean isUniqueMethodName(ClassNode node, String name)
 	{
-		if (node.methods == null)
-			return true;
-		return !node.methods.stream().map(m -> m.name).anyMatch(name::equals);
+		return node.methods == null || !node.methods.stream().map(m -> m.name).anyMatch(name::equals);
 	}
 	
 	private static boolean isUniqueFieldName(ClassNode node, String name)
 	{
-		if (node.fields == null)
-			return true;
-		return !node.fields.stream().map(m -> m.name).anyMatch(name::equals);
+		return node.fields == null || !node.fields.stream().map(m -> m.name).anyMatch(name::equals);
+	}
+	
+	static void addConvertToPrimitive(Type type, InsnList insn, LocalVariableNode element)
+	{
+		final var desc = fDesc(element.desc);
+		switch (type.getSort())
+		{
+			case Type.BOOLEAN -> toPrimitive(Boolean.class, "booleanValue", insn, desc);
+			case Type.CHAR -> toPrimitive(Character.class, "charValue", insn, desc);
+			case Type.BYTE -> toPrimitive(Byte.class, "byteValue", insn, desc);
+			case Type.SHORT -> toPrimitive(Short.class, "shortValue", insn, desc);
+			case Type.INT -> toPrimitive(Integer.class, "intValue", insn, desc);
+			case Type.FLOAT -> toPrimitive(Float.class, "floatValue", insn, desc);
+			case Type.LONG -> toPrimitive(Long.class, "longValue", insn, desc);
+			case Type.DOUBLE -> toPrimitive(Double.class, "doubleValue", insn, desc);
+			case Type.ARRAY, Type.OBJECT -> insn.add(new TypeInsnNode(CHECKCAST, type.getInternalName()));
+			case Type.METHOD -> throw new IllegalStateException("Methods are not supported yet!");
+			default -> throw new IllegalStateException("Parameter of type: " + type.getSort() + " are not supported");
+		}
+	}
+	
+	private static void toPrimitive(Class<?> clazz, String castMethod, InsnList instructions, String desc)
+	{
+		String owner = toInternal(clazz);
+		instructions.add(new TypeInsnNode(CHECKCAST, owner));
+		instructions.add(new MethodInsnNode(INVOKEVIRTUAL, owner, castMethod, desc));
 	}
 }

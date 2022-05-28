@@ -10,11 +10,15 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.invoke.CallSite;
+import java.lang.invoke.LambdaMetafactory;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -38,36 +42,34 @@ import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.TypeInsnNode;
 import org.objectweb.asm.tree.VarInsnNode;
 
+import de.tinycodecrank.asm.cache.ComponentWriter.CacheSpec;
 import de.tinycodecrank.cache.Cache;
-import de.tinycodecrank.collections.data.Tuple;
 import de.tinycodecrank.io.FileSystemUtils;
 import de.tinycodecrank.monads.Opt;
 
 public class DecoratorCache implements Opcodes
 {
+	private static final String	CACHE_CAP_CONST_DESC	= fDesc("V", Function.class, "I");
+	private static final String	CACHE_CONST_DESC		= fDesc("V", Function.class);
+	private static final String	METAFACTORY_DESC		= fDesc(
+		CallSite.class,
+		MethodHandles.Lookup.class,
+		String.class,
+		MethodType.class,
+		MethodType.class,
+		MethodHandle.class,
+		MethodType.class);
+	
 	public static void main(String[] args)
 	{
-		File binDir;
-		if (args.length > 0)
-		{
-			binDir = new File(args[0]);
-		}
-		else
-		{
-			binDir = new File(".");
-		}
+		final File binDir = args.length > 0 ? new File(args[0]) : new File(".");
+		
 		if (binDir.isDirectory())
 		{
-			new FileSystemUtils().performRecursive(binDir, f ->
-			{
-				if (f.isFile())
-				{
-					System.out.println("scanning content: %s".formatted(f.getAbsolutePath()));
-					return adapt(Cache.class, f);
-				}
-				return true;
-			}, Boolean::logicalAnd);
-			
+			new FileSystemUtils().performRecursive(
+				binDir,
+				f -> f.isFile() ? adapt(Cache.class, f) : true,
+				Boolean::logicalAnd);
 		}
 		else
 		{
@@ -82,12 +84,16 @@ public class DecoratorCache implements Opcodes
 	 *            the class reader
 	 * @return the adapted Opt<ClassNode> or Opt.empty() if nothing changed.
 	 */
-	public static Opt<ClassNode> adapt(Class<?> annotation, ClassReader reader)
+	private static Opt<ClassNode> adapt(Class<?> annotation, ClassReader reader)
 	{
 		final var	annotationDesc	= toDesc(annotation);
 		final var	classNode		= new ClassNode();
 		reader.accept(classNode, 0);
-		final var toCache = new ArrayList<Tuple<MethodNode, AnnotationNode>>();
+		
+		record CacheTarget(MethodNode method, AnnotationNode annotation)
+		{}
+		
+		final var toCache = new ArrayList<CacheTarget>();
 		
 		methods:
 		for (final var method : classNode.methods)
@@ -99,7 +105,7 @@ public class DecoratorCache implements Opcodes
 					if (a.desc.equals(annotationDesc))
 					{
 						method.invisibleAnnotations.remove(a);
-						toCache.add(new Tuple<>(method, a));
+						toCache.add(new CacheTarget(method, a));
 						continue methods;
 					}
 				}
@@ -111,24 +117,14 @@ public class DecoratorCache implements Opcodes
 					if (a.desc.equals(annotationDesc))
 					{
 						method.visibleAnnotations.remove(a);
-						toCache.add(new Tuple<>(method, a));
+						toCache.add(new CacheTarget(method, a));
 						break;
 					}
 				}
 			}
 		}
-		for (final var t : toCache)
-		{
-			createCachedVersion(classNode, t.first(), t.second());
-		}
-		if (toCache.isEmpty())
-		{
-			return Opt.empty();
-		}
-		else
-		{
-			return Opt.of(classNode);
-		}
+		toCache.forEach(target -> createCachedVersion(classNode, target.method(), target.annotation()));
+		return Opt.of(classNode).filter(_c -> !toCache.isEmpty());
 	}
 	
 	private static boolean adapt(Class<?> annotation, File classFile)
@@ -162,7 +158,7 @@ public class DecoratorCache implements Opcodes
 				original,
 				cacheField,
 				originalName,
-				SPEC.first().getInternalName());
+				SPEC.cacheType().getInternalName());
 			
 			transferAnnotations(original, cached);
 			
@@ -174,35 +170,30 @@ public class DecoratorCache implements Opcodes
 		}
 	}
 	
+	private static <E> List<E> copyList(List<E> orig, List<E> targ)
+	{
+		targ = Opt.of(targ).get(ArrayList::new);
+		if (orig != null)
+		{
+			for (final var i = orig.iterator(); i.hasNext();)
+			{
+				targ.add(i.next());
+				i.remove();
+			}
+		}
+		return targ;
+	}
+	
 	private static void transferAnnotations(MethodNode origin, MethodNode target)
 	{
-		BiFunction<List<AnnotationNode>, List<AnnotationNode>, List<AnnotationNode>> copy = (orig, targ) ->
-		{
-			if (targ == null)
-			{
-				targ = new ArrayList<>();
-			}
-			if (orig != null)
-			{
-				
-				for (Iterator<AnnotationNode> i = orig.iterator(); i.hasNext();)
-				{
-					final var annotation = i.next();
-					i.remove();
-					targ.add(annotation);
-				}
-			}
-			return targ;
-		};
-		
-		target.visibleAnnotations	= copy.apply(origin.visibleAnnotations, target.visibleAnnotations);
-		target.invisibleAnnotations	= copy.apply(origin.invisibleAnnotations, target.invisibleAnnotations);
+		target.visibleAnnotations	= copyList(origin.visibleAnnotations, target.visibleAnnotations);
+		target.invisibleAnnotations	= copyList(origin.invisibleAnnotations, target.invisibleAnnotations);
 	}
 	
 	private static MethodNode generateWrapped(ClassNode classNode, MethodNode original, String originalName)
 	{
-		int			access		= original.access & ~ACC_PUBLIC & ~ACC_PROTECTED | ACC_PRIVATE | ACC_FINAL;
-		Type		returnType	= Type.getReturnType(original.desc);
+		final int	access		= original.access & ~ACC_PUBLIC & ~ACC_PROTECTED | ACC_PRIVATE | ACC_FINAL;
+		final var	returnType	= Type.getReturnType(original.desc);
 		final var	wrapped		= new MethodNode(
 			access,
 			generateUniqueMethodName(classNode, "¢" + originalName),
@@ -226,20 +217,16 @@ public class DecoratorCache implements Opcodes
 		
 		// setup Local variables
 		final var	offset		= isStatic(original.access) ? 0 : -1;
-		int			argsCount	= Type.getArgumentTypes(original.desc).length;
+		final int	argsCount	= Type.getArgumentTypes(original.desc).length;
 		final var	params		= new LocalVariableNode[argsCount];
 		for (final var element : range(original.localVariables))
 		{
 			if (element.element().name.equals("this"))
-			{
 				continue;
-			}
-			final var	loc	= element.element();
-			final var	i	= element.index() + offset;
+			final var i = element.index() + offset;
 			if (i == argsCount)
-			{
 				break;
-			}
+			final var loc = element.element();
 			params[i] = new LocalVariableNode(loc.name, loc.desc, null, new LabelNode(), end, index++);
 			wrapped.localVariables.add(params[i]);
 		}
@@ -252,35 +239,13 @@ public class DecoratorCache implements Opcodes
 		// store into local variables
 		for (final var element : range(params))
 		{
+			final var type = Type.getType(element.element().desc);
+			
 			wrapped.instructions.add(new VarInsnNode(ALOAD, array.index));
-			Type type = Type.getType(element.element().desc);
 			wrapped.instructions.add(new LdcInsnNode(element.index()));
 			wrapped.instructions.add(new InsnNode(AALOAD));
 			// adapt for primitives and cast
-			BiConsumer<Class<?>, String> toPrimitive = (c, method) ->
-			{
-				String owner = toInternal(c);
-				wrapped.instructions.add(new TypeInsnNode(CHECKCAST, owner));
-				wrapped.instructions
-					.add(new MethodInsnNode(INVOKEVIRTUAL, owner, method, fDesc(element.element().desc)));
-			};
-			
-			switch (type.getSort())
-			{
-				case Type.BOOLEAN -> toPrimitive.accept(Boolean.class, "booleanValue"); // 1
-				case Type.CHAR -> toPrimitive.accept(Character.class, "charValue"); // 2
-				case Type.BYTE -> toPrimitive.accept(Byte.class, "byteValue"); // 3
-				case Type.SHORT -> toPrimitive.accept(Short.class, "shortValue"); // 4
-				case Type.INT -> toPrimitive.accept(Integer.class, "intValue"); // 5
-				case Type.FLOAT -> toPrimitive.accept(Float.class, "floatValue"); // 6
-				case Type.LONG -> toPrimitive.accept(Long.class, "longValue"); // 7
-				case Type.DOUBLE -> toPrimitive.accept(Double.class, "doubleValue"); // 8
-				case Type.ARRAY, Type.OBJECT -> wrapped.instructions
-					.add(new TypeInsnNode(CHECKCAST, type.getInternalName())); // 9, 10
-				case Type.METHOD -> throw new IllegalStateException("Methods are not supported yet!"); // 11
-				default -> throw new IllegalStateException(
-					"Parameter of type: " + type.getSort() + " are not supported");
-			}
+			addConvertToPrimitive(type, wrapped.instructions, element.element());
 			// store value
 			wrapped.instructions.add(new VarInsnNode(type.getOpcode(ISTORE), element.element().index));
 			wrapped.instructions.add(element.element().start);
@@ -293,7 +258,7 @@ public class DecoratorCache implements Opcodes
 		// push to stack from local variables
 		for (var element : range(params).element())
 		{
-			Type type = Type.getType(element.desc);
+			final var type = Type.getType(element.desc);
 			wrapped.instructions.add(new VarInsnNode(type.getOpcode(ILOAD), element.index));
 		}
 		wrapped.instructions.add(
@@ -308,7 +273,7 @@ public class DecoratorCache implements Opcodes
 	}
 	
 	@SuppressWarnings("deprecation")
-	private static FieldNode createCache(ClassNode classNode, MethodNode function, Tuple<Type, Integer> SPEC)
+	private static FieldNode createCache(ClassNode classNode, MethodNode function, CacheSpec SPEC)
 	{
 		boolean isStatic = isStatic(function.access);
 		// calculate field access modifiers
@@ -319,7 +284,7 @@ public class DecoratorCache implements Opcodes
 		}
 		
 		String		fieldName	= ComponentWriter.generateUniqueFieldName(classNode, function.name);
-		FieldNode	field		= new FieldNode(access, fieldName, SPEC.first().getDescriptor(), null, null);
+		FieldNode	field		= new FieldNode(access, fieldName, SPEC.cacheType().getDescriptor(), null, null);
 		classNode.fields.add(field);
 		
 		MethodNode	init	= getOrCreateInitializer(classNode, isStatic);
@@ -342,43 +307,35 @@ public class DecoratorCache implements Opcodes
 			instance = findLocal(init, "this").get();
 			init.instructions.add(new VarInsnNode(ALOAD, instance.index));
 		}
-		init.instructions.add(new TypeInsnNode(NEW, SPEC.first().getInternalName()));
+		init.instructions.add(new TypeInsnNode(NEW, SPEC.cacheType().getInternalName()));
 		init.instructions.add(new InsnNode(DUP));
 		if (!isStatic)
 		{
 			init.instructions.add(new VarInsnNode(ALOAD, instance.index));
 		}
+		
+		final int invokeTag = isStatic ? H_INVOKESTATIC : H_INVOKESPECIAL;
+		
 		init.instructions.add(
 			new InvokeDynamicInsnNode(
 				"apply",
 				isStatic ? fDesc(Function.class) : fDesc(Function.class, toDesc(classNode.name)),
-				new Handle(
-					H_INVOKESTATIC,
-					"java/lang/invoke/LambdaMetafactory",
-					"metafactory",
-					"(Ljava/lang/invoke/MethodHandles$Lookup;"
-						+ toDesc(String.class)
-						+ "Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodHandle;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite;",
-					false),
+				new Handle(H_INVOKESTATIC, toInternal(LambdaMetafactory.class), "metafactory", METAFACTORY_DESC, false),
 				Type.getMethodType(fDesc(Object.class, Object.class)),
-				new Handle(
-					isStatic ? H_INVOKESTATIC : H_INVOKESPECIAL,
-					classNode.name,
-					function.name,
-					function.desc,
-					false),
+				new Handle(invokeTag, classNode.name, function.name, function.desc, false),
 				Type.getMethodType(function.desc)));
 		String invokeDesc;
-		if (SPEC.second() > 0)
+		if (SPEC.capacity() > 0)
 		{
-			init.instructions.add(new LdcInsnNode(SPEC.second()));
-			invokeDesc = fDesc("V", Function.class, "I");
+			init.instructions.add(new LdcInsnNode(SPEC.capacity()));
+			invokeDesc = CACHE_CAP_CONST_DESC;
 		}
 		else
 		{
-			invokeDesc = fDesc("V", Function.class);
+			invokeDesc = CACHE_CONST_DESC;
 		}
-		init.instructions.add(new MethodInsnNode(INVOKESPECIAL, SPEC.first().getInternalName(), "<init>", invokeDesc));
+		init.instructions
+			.add(new MethodInsnNode(INVOKESPECIAL, SPEC.cacheType().getInternalName(), "<init>", invokeDesc));
 		init.instructions
 			.add(new FieldInsnNode(isStatic ? PUTSTATIC : PUTFIELD, classNode.name, field.name, field.desc));
 		buffer.forEach(init.instructions::add);
