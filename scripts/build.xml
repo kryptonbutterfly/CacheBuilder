@@ -28,6 +28,7 @@
             <fileset dir="${libs}/Sort/bin" excludes="module-info.class"/>
             <fileset dir="${libs}/System/bin" excludes="module-info.class"/>
             <fileset dir="${libs}/Concurrent/bin" excludes="module-info.class"/>
+        	<fileset dir="${libs}/Bounded/bin" excludes="module-info.class"/>
         </jar>
     </target>
 </project>
