@@ -411,11 +411,9 @@ public class DecoratorCache implements Opcodes
 				case Type.LONG -> toObject.accept(Long.class);
 				case Type.DOUBLE -> toObject.accept(Double.class);
 				case Type.ARRAY, Type.OBJECT, Type.METHOD ->
-						{
-						} /* nothing to do here */
+						{} /* nothing to do here */
 				case Type.VOID ->
-						{
-						}
+						{}
 				default -> throw new IllegalStateException(
 					"Parameter of type: " + type.getSort() + " are not supported");
 			}
@@ -463,8 +461,7 @@ public class DecoratorCache implements Opcodes
 			case Type.ARRAY, Type.OBJECT, Type.METHOD -> cached.instructions
 				.add(new TypeInsnNode(CHECKCAST, returnType.getInternalName()));
 			case Type.VOID ->
-					{
-					}
+					{}
 			default -> throw new IllegalStateException("ReturnType: " + returnType.getSort() + " is not supported");
 		
 		}
@@ -484,7 +481,6 @@ public class DecoratorCache implements Opcodes
 			{
 				oStream.write(cw.toByteArray());
 				oStream.flush();
-				System.out.println("adapted: %s".formatted(classFile.getCanonicalPath()));
 				return true;
 			}
 			catch (IOException e)

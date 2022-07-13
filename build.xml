@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE xml>
 <project default="create_run_jar" name="Create Runnable Jar for Project CacheASM">
-    <property name="dir.buildfile" value="../zip/builder/buildJars"/>
 	<property name="dir.ws" value="${user.home}/eclipse-workspaces"/>
-	<property name="dir.git" value="${dir.ws}/Git"/>
-	<property name="libs" value="${dir.git}/libs"/>
+    <property name="jarfile" value="${basedir}/zip/builder/buildJars/CacheASM.jar"/>
+	<property name="git" value="${dir.ws}/Git"/>
+	<property name="libs" value="${git}/libs"/>
     <target name="create_run_jar">
-        <jar destfile="${dir.buildfile}/CacheASM.jar" filesetmanifest="mergewithoutmain">
+        <jar destfile="${jarfile}" filesetmanifest="mergewithoutmain">
             <manifest>
 				<attribute name="Main-Class" value="org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader"/>
                 <attribute name="Rsrc-Main-Class" value="de.tinycodecrank.asm.cache.DecoratorCache"/>
@@ -31,4 +31,33 @@
         	<fileset dir="${libs}/Bounded/bin" excludes="module-info.class"/>
         </jar>
     </target>
+	
+	<property name="zipFile" value="${basedir}/build/CacheASM.zip"/>
+	
+	<target name="package processor">
+		<exec executable="rm">
+			<arg value="-f"/>
+			<arg value="-I"/>
+			<arg value="${zipFile}"/>
+		</exec>
+		<exec dir="${basedir}/zip/" executable="zip">
+			<arg value="-q"/>
+			<arg value="-r"/>
+			<arg value="${zipFile}"/>
+			<arg value="."/>
+			<arg value="-i"/>
+			<arg value="*"/>
+		</exec>
+	</target>
+	
+	<target name="deploy processor">
+		<exec executable="unzip">
+			<arg value="-qq"/>
+			<arg value="-u"/>
+			<arg value="-o"/>
+			<arg value="${zipFile}"/>
+			<arg value="-d"/>
+			<arg value="${eclipse.home}"/>
+		</exec>
+	</target>
 </project>
