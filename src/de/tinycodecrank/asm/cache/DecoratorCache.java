@@ -45,7 +45,7 @@ import org.objectweb.asm.tree.VarInsnNode;
 import de.tinycodecrank.asm.cache.ComponentWriter.CacheSpec;
 import de.tinycodecrank.cache.Cache;
 import de.tinycodecrank.io.FileSystemUtils;
-import de.tinycodecrank.monads.Opt;
+import de.tinycodecrank.monads.opt.Opt;
 
 public class DecoratorCache implements Opcodes
 {

@@ -22,7 +22,7 @@ import org.objectweb.asm.tree.TypeInsnNode;
 import org.objectweb.asm.tree.VarInsnNode;
 
 import de.tinycodecrank.cache.CacheConstants;
-import de.tinycodecrank.monads.Opt;
+import de.tinycodecrank.monads.opt.Opt;
 
 public class ComponentWriter implements Opcodes
 {
