@@ -19,16 +19,16 @@
 			<zipfileset dir="${libs}/CacheASM/deps" includes="asm-9.2.jar asm-tree-9.2.jar"/>
 			<zipfileset src="${libs}/CacheASM/deps/jar-in-jar-loader.zip"/>
 			<fileset dir="${libs}/CacheASM/bin"/>
-			<fileset dir="${libs}/Cache/bin" excludes="module-info.class"/>
-			<fileset dir="${libs}/Collections/bin" excludes="module-info.class"/>
-			<fileset dir="${libs}/mathUtils/bin" excludes="module-info.class"/>
-			<fileset dir="${libs}/Monads/bin" excludes="module-info.class"/>
-			<fileset dir="${libs}/Iterator/bin" excludes="module-info.class"/>
-			<fileset dir="${libs}/Functional/bin" excludes="module-info.class"/>
-			<fileset dir="${libs}/Sort/bin" excludes="module-info.class"/>
+			<fileset dir="${libs}/Functional/target/classes" excludes="module-info.class"/>
+			<fileset dir="${libs}/Cache/target/classes" excludes="module-info.class"/>
+			<fileset dir="${libs}/Collections/target/classes" excludes="module-info.class"/>
+			<fileset dir="${libs}/mathUtils/target/classes" excludes="module-info.class"/>
+			<fileset dir="${libs}/Monads/target/classes" excludes="module-info.class"/>
+			<fileset dir="${libs}/Iterator/target/classes" excludes="module-info.class"/>
+			<!--<fileset dir="${libs}/Sort/bin" excludes="module-info.class"/> -->
 			<fileset dir="${libs}/System/bin" excludes="module-info.class"/>
 			<fileset dir="${libs}/Concurrent/bin" excludes="module-info.class"/>
-			<fileset dir="${libs}/Bounded/bin" excludes="module-info.class"/>
+			<fileset dir="${libs}/Bounded/target/classes" excludes="module-info.class"/>
 		</jar>
 	</target>
 	
