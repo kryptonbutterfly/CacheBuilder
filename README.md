@@ -4,7 +4,9 @@ ByteCode manipulator used to decorate methods using **@Cache** annotations.
 
 ## Download
 
-[CacheASM.zip](https://github.com/tinycodecrank/CacheBuilder/releases/download/v1.0.0/CacheASM.zip)
+java version | library version | Download
+:----------: | :-------------: | :-------
+18+          | 1.0.0           | [CacheASM.zip](https://github.com/tinycodecrank/CacheBuilder/releases/download/v1.0.0/CacheASM.zip)
 
 ## Install
 
@@ -45,3 +47,9 @@ extract **CacheASM.zip** in your <span style="color:#00aaee">**eclipse install d
 - click ![Apply](md/icons/btnApply.png)
 - click ![OK](md/icons/btnOK.png)
 - click ![Apply and Close](md/icons/btnApplyAndClose.png)
+
+## Dependencies
+* [**asm-9.2.jar**](https://repo1.maven.org/maven2/org/ow2/asm/asm/9.2/asm-9.2.jar)
+* [**asm-tree-9.2.jar**](https://repo1.maven.org/maven2/org/ow2/asm/asm-tree/9.2/asm-tree-9.2.jar)
+* eclipse jar-in-jar-loader.zip
+* TODO list remaining dependencies
