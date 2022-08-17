@@ -16,8 +16,8 @@
 				<attribute name="Can-Retransform-Classes" value="true"/>
 				<attribute name="Can-Set-Native-Method-Prefix" value="false"/> -->
 			</manifest>
-			<zipfileset dir="${libs}/CacheASM/libs" includes="asm-9.2.jar asm-tree-9.2.jar"/>
-			<zipfileset src="${libs}/CacheASM/libs/jar-in-jar-loader.zip"/>
+			<zipfileset dir="${libs}/CacheASM/deps" includes="asm-9.2.jar asm-tree-9.2.jar"/>
+			<zipfileset src="${libs}/CacheASM/deps/jar-in-jar-loader.zip"/>
 			<fileset dir="${libs}/CacheASM/bin"/>
 			<fileset dir="${libs}/Cache/bin" excludes="module-info.class"/>
 			<fileset dir="${libs}/Collections/bin" excludes="module-info.class"/>
