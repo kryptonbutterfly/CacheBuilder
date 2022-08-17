@@ -25,7 +25,6 @@
 			<fileset dir="${libs}/mathUtils/target/classes" excludes="module-info.class"/>
 			<fileset dir="${libs}/Monads/target/classes" excludes="module-info.class"/>
 			<fileset dir="${libs}/Iterator/target/classes" excludes="module-info.class"/>
-			<!--<fileset dir="${libs}/Sort/bin" excludes="module-info.class"/> -->
 			<fileset dir="${libs}/System/bin" excludes="module-info.class"/>
 			<fileset dir="${libs}/Concurrent/bin" excludes="module-info.class"/>
 			<fileset dir="${libs}/Bounded/target/classes" excludes="module-info.class"/>
