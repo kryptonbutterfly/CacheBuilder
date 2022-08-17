@@ -17,7 +17,7 @@ extract **CacheASM.zip** in your <span style="color:#00aaee">**eclipse install d
 - select ![Run/Debug ➜ Launch Configuration](md/icons/Run_Debug-Launch_Configuration.png)
 - click ![Next >](md/icons/Next_>.png)
 - click ![Browse](md/icons/Browse.png)
-- navigate to **<span style="color:#00aaee">eclipse install directory</span>/builder/launch-configs**
+- navigate to <span style="color:#00aaee">**eclipse install directory**</span>**/builder/launch-configs**
   </br>!["eclipse install directory"/builder/launch-configs](md/icons/BrowseLaunchConfig.png)
 - click ![Open](md/icons/Open.png)
 - highlight **launch-config** select **Cache.launch**
