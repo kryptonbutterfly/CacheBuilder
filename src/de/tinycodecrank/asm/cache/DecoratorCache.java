@@ -129,9 +129,23 @@ public class DecoratorCache implements Opcodes
 	
 	private static boolean adapt(Class<?> annotation, File classFile)
 	{
+		if (!classFile.getName().endsWith(".class"))
+		{
+			System.out.printf("Skipping: Not a .class file: %s\n", classFile);
+			return false;
+		}
 		try (InputStream iStream = new FileInputStream(classFile))
 		{
-			ClassReader reader = new ClassReader(iStream);
+			final ClassReader reader;
+			try
+			{
+				reader = new ClassReader(iStream);
+			}
+			catch (IllegalArgumentException e)
+			{
+				System.err.printf("Unable to process %s\n%s", classFile, e.getMessage());
+				return false;
+			}
 			return adapt(annotation, reader).filter(classNode -> compile(classFile, classNode)).isPresent();
 		}
 		catch (IOException e)
@@ -402,20 +416,20 @@ public class DecoratorCache implements Opcodes
 				.add(new MethodInsnNode(INVOKESTATIC, toInternal(c), "valueOf", fDesc(c, loc.desc)));
 			switch (type.getSort())
 			{
-				case Type.BOOLEAN -> toObject.accept(Boolean.class);
-				case Type.CHAR -> toObject.accept(Character.class);
-				case Type.BYTE -> toObject.accept(Byte.class);
-				case Type.SHORT -> toObject.accept(Short.class);
-				case Type.INT -> toObject.accept(Integer.class);
-				case Type.FLOAT -> toObject.accept(Float.class);
-				case Type.LONG -> toObject.accept(Long.class);
-				case Type.DOUBLE -> toObject.accept(Double.class);
-				case Type.ARRAY, Type.OBJECT, Type.METHOD ->
-						{} /* nothing to do here */
-				case Type.VOID ->
-						{}
-				default -> throw new IllegalStateException(
-					"Parameter of type: " + type.getSort() + " are not supported");
+			case Type.BOOLEAN -> toObject.accept(Boolean.class);
+			case Type.CHAR -> toObject.accept(Character.class);
+			case Type.BYTE -> toObject.accept(Byte.class);
+			case Type.SHORT -> toObject.accept(Short.class);
+			case Type.INT -> toObject.accept(Integer.class);
+			case Type.FLOAT -> toObject.accept(Float.class);
+			case Type.LONG -> toObject.accept(Long.class);
+			case Type.DOUBLE -> toObject.accept(Double.class);
+			case Type.ARRAY, Type.OBJECT, Type.METHOD ->
+					{} /* nothing to do here */
+			case Type.VOID ->
+					{}
+			default -> throw new IllegalStateException(
+				"Parameter of type: " + type.getSort() + " are not supported");
 			}
 			cached.instructions.add(new InsnNode(AASTORE));
 		}
@@ -450,20 +464,20 @@ public class DecoratorCache implements Opcodes
 		};
 		switch (returnType.getSort())
 		{
-			case Type.BOOLEAN -> toPrimitive.accept(Boolean.class, "booleanValue");
-			case Type.CHAR -> toPrimitive.accept(Character.class, "charValue");
-			case Type.BYTE -> toPrimitive.accept(Byte.class, "byteValue");
-			case Type.SHORT -> toPrimitive.accept(Short.class, "shortValue");
-			case Type.INT -> toPrimitive.accept(Integer.class, "intValue");
-			case Type.FLOAT -> toPrimitive.accept(Float.class, "floatValue");
-			case Type.LONG -> toPrimitive.accept(Long.class, "longValue");
-			case Type.DOUBLE -> toPrimitive.accept(Double.class, "doubleValue");
-			case Type.ARRAY, Type.OBJECT, Type.METHOD -> cached.instructions
-				.add(new TypeInsnNode(CHECKCAST, returnType.getInternalName()));
-			case Type.VOID ->
-					{}
-			default -> throw new IllegalStateException("ReturnType: " + returnType.getSort() + " is not supported");
-		
+		case Type.BOOLEAN -> toPrimitive.accept(Boolean.class, "booleanValue");
+		case Type.CHAR -> toPrimitive.accept(Character.class, "charValue");
+		case Type.BYTE -> toPrimitive.accept(Byte.class, "byteValue");
+		case Type.SHORT -> toPrimitive.accept(Short.class, "shortValue");
+		case Type.INT -> toPrimitive.accept(Integer.class, "intValue");
+		case Type.FLOAT -> toPrimitive.accept(Float.class, "floatValue");
+		case Type.LONG -> toPrimitive.accept(Long.class, "longValue");
+		case Type.DOUBLE -> toPrimitive.accept(Double.class, "doubleValue");
+		case Type.ARRAY, Type.OBJECT, Type.METHOD -> cached.instructions
+			.add(new TypeInsnNode(CHECKCAST, returnType.getInternalName()));
+		case Type.VOID ->
+				{}
+		default -> throw new IllegalStateException("ReturnType: " + returnType.getSort() + " is not supported");
+	
 		}
 		cached.instructions.add(new InsnNode(returnType.getOpcode(IRETURN)));
 		cached.instructions.add(end);
