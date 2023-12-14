@@ -4,3 +4,4 @@ build/
 zip/builder/buildJars/*
 
 deps/
+/target/
