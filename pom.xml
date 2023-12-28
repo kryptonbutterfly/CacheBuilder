@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>de.tinycodecrank</groupId>
 	<artifactId>cache_builder</artifactId>
-	<version>1.0.0</version>
+	<version>1.1.0</version>
 	<name>CacheBuilder</name>
 	<description>A java bytecode manipulator to decorate annotated functions with a specified cache</description>
 	

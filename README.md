@@ -1,4 +1,4 @@
-# CacheASM
+# CacheBuilder [![Maven Package](https://github.com/tinycodecrank/CacheBuilder/actions/workflows/maven-publish.yml/badge.svg)](https://github.com/tinycodecrank/CacheBuilder/actions/workflows/maven-publish.yml)
 
 ByteCode manipulator used to decorate methods using **[@Cache](https://github.com/tinycodecrank/tinyCache)** annotations.
 
@@ -6,6 +6,7 @@ ByteCode manipulator used to decorate methods using **[@Cache](https://github.co
 
 java version | library version | Download
 :----------: | :-------------: | :-------
+18+          | 1.1.0           | [CacheBuilder.zip](https://github.com/tinycodecrank/CacheBuilder/releases/download/v1.1.0/CacheBuilder.zip)</br>[CacheBuilder.tar.gz](https://github.com/tinycodecrank/CacheBuilder/releases/download/v1.1.0/CacheBuilder.tar.gz)
 18+          | 1.0.0           | [CacheASM.zip](https://github.com/tinycodecrank/CacheBuilder/releases/download/v1.0.0/CacheASM.zip)
 
 ## Install
