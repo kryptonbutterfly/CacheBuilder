@@ -2,6 +2,22 @@
 
 ByteCode manipulator used to decorate methods using **[@Cache](https://github.com/tinycodecrank/tinyCache)** annotations.
 
+## Getting the latest release
+
+```xml
+<repository>
+  <id>github</id>
+  <url>https://maven.pkg.github.com/tinycodecrank/maven-repo</url>
+</repository>
+```
+```xml
+<dependency>
+  <groupId>de.tinycodecrank</groupId>
+  <artifactId>cache_builder</artifactId>
+  <version>1.1.0</version>
+</dependency>
+```
+
 ## Download
 
 java version | library version | Download
