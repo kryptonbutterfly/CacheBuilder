@@ -12,9 +12,9 @@ ByteCode manipulator used to decorate methods using **[@Cache](https://github.co
 ```
 ```xml
 <dependency>
-  <groupId>de.tinycodecrank</groupId>
+  <groupId>kryptonbutterfly</groupId>
   <artifactId>cache_builder</artifactId>
-  <version>1.1.0</version>
+  <version>2.0.0</version>
 </dependency>
 ```
 
@@ -22,6 +22,7 @@ ByteCode manipulator used to decorate methods using **[@Cache](https://github.co
 
 java version | library version | Download
 :----------: | :-------------: | :-------
+18+          | 2.0.0           | [cache_builder-2.0.0-setup.zip](https://github-registry-files.githubusercontent.com/731108692/2ff3ba00-b6b2-11ee-9145-07a6201d0f00?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAVCODYLSA53PQK4ZA%2F20240119%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20240119T090910Z&X-Amz-Expires=300&X-Amz-Signature=38c39e8068ae7b1b73d3190fccb25d32b1a25095c9ab7ab9f2b18002991609d6&X-Amz-SignedHeaders=host&actor_id=0&key_id=0&repo_id=731108692&response-content-disposition=filename%3Dcache_builder-2.0.0-setup.zip&response-content-type=application%2Foctet-stream)</br>[cache_builder-2.0.0-setup.tar.gz](https://github-registry-files.githubusercontent.com/731108692/3124e700-b6b2-11ee-8dc8-e84e0ff6435e?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAVCODYLSA53PQK4ZA%2F20240119%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20240119T090910Z&X-Amz-Expires=300&X-Amz-Signature=63d67b14958b5c319ce7fc54b0cfbd748d52d7870e61005a87dfff3734011279&X-Amz-SignedHeaders=host&actor_id=0&key_id=0&repo_id=731108692&response-content-disposition=filename%3Dcache_builder-2.0.0-setup.tar.gz&response-content-type=application%2Foctet-stream)
 18+          | 1.1.0           | [CacheBuilder.zip](https://github.com/kryptonbutterfly/CacheBuilder/releases/download/v1.1.0/CacheBuilder.zip)</br>[CacheBuilder.tar.gz](https://github.com/kryptonbutterfly/CacheBuilder/releases/download/v1.1.0/CacheBuilder.tar.gz)
 18+          | 1.0.0           | [CacheASM.zip](https://github.com/kryptonbutterfly/CacheBuilder/releases/download/v1.0.0/CacheASM.zip)
 
