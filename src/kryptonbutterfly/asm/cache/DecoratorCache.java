@@ -1,8 +1,7 @@
-package de.tinycodecrank.asm.cache;
+package kryptonbutterfly.asm.cache;
 
-import static de.tinycodecrank.asm.cache.ComponentWriter.*;
-import static de.tinycodecrank.math.utils.range.ArrayRange.range;
-import static de.tinycodecrank.math.utils.range.ListRange.range;
+import static kryptonbutterfly.asm.cache.ComponentWriter.*;
+import static kryptonbutterfly.math.utils.range.Range.*;
 
 import java.io.DataOutputStream;
 import java.io.File;
@@ -42,10 +41,10 @@ import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.TypeInsnNode;
 import org.objectweb.asm.tree.VarInsnNode;
 
-import de.tinycodecrank.asm.cache.ComponentWriter.CacheSpec;
-import de.tinycodecrank.cache.Cache;
-import de.tinycodecrank.io.FileSystemUtils;
-import de.tinycodecrank.monads.opt.Opt;
+import kryptonbutterfly.asm.cache.ComponentWriter.CacheSpec;
+import kryptonbutterfly.cache.Cache;
+import kryptonbutterfly.io.FileSystemUtils;
+import kryptonbutterfly.monads.opt.Opt;
 
 public class DecoratorCache implements Opcodes
 {
@@ -452,8 +451,7 @@ public class DecoratorCache implements Opcodes
 		
 		Type returnType = Type.getReturnType(original.desc);
 		
-		BiConsumer<Class<?>, String> toPrimitive = (clazz, methodName) ->
-		{
+		BiConsumer<Class<?>, String> toPrimitive = (clazz, methodName) -> {
 			cached.instructions.add(new TypeInsnNode(CHECKCAST, toInternal(clazz)));
 			cached.instructions.add(
 				new MethodInsnNode(

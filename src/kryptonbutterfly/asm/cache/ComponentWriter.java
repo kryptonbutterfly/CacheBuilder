@@ -1,6 +1,6 @@
-package de.tinycodecrank.asm.cache;
+package kryptonbutterfly.asm.cache;
 
-import static de.tinycodecrank.math.utils.range.Range.*;
+import static kryptonbutterfly.math.utils.range.Range.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,8 +21,8 @@ import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.TypeInsnNode;
 import org.objectweb.asm.tree.VarInsnNode;
 
-import de.tinycodecrank.cache.CacheConstants;
-import de.tinycodecrank.monads.opt.Opt;
+import kryptonbutterfly.cache.CacheConstants;
+import kryptonbutterfly.monads.opt.Opt;
 
 public class ComponentWriter implements Opcodes
 {
@@ -70,8 +70,7 @@ public class ComponentWriter implements Opcodes
 			? 0
 				: node.access & ACC_PUBLIC | node.access & ACC_PROTECTED | node.access & ACC_PRIVATE;
 		
-		return Opt.of(matches).filter(m -> !m.isEmpty()).map(m -> m.get(0)).get(() ->
-		{
+		return Opt.of(matches).filter(m -> !m.isEmpty()).map(m -> m.get(0)).get(() -> {
 			MethodNode init = new MethodNode((isStatic ? ACC_STATIC : 0) | visibility, INIT, "()V", null, null);
 			node.methods.add(0, init);
 			if (!isStatic)
@@ -198,17 +197,17 @@ public class ComponentWriter implements Opcodes
 		final var desc = fDesc(element.desc);
 		switch (type.getSort())
 		{
-			case Type.BOOLEAN -> toPrimitive(Boolean.class, "booleanValue", insn, desc);
-			case Type.CHAR -> toPrimitive(Character.class, "charValue", insn, desc);
-			case Type.BYTE -> toPrimitive(Byte.class, "byteValue", insn, desc);
-			case Type.SHORT -> toPrimitive(Short.class, "shortValue", insn, desc);
-			case Type.INT -> toPrimitive(Integer.class, "intValue", insn, desc);
-			case Type.FLOAT -> toPrimitive(Float.class, "floatValue", insn, desc);
-			case Type.LONG -> toPrimitive(Long.class, "longValue", insn, desc);
-			case Type.DOUBLE -> toPrimitive(Double.class, "doubleValue", insn, desc);
-			case Type.ARRAY, Type.OBJECT -> insn.add(new TypeInsnNode(CHECKCAST, type.getInternalName()));
-			case Type.METHOD -> throw new IllegalStateException("Methods are not supported yet!");
-			default -> throw new IllegalStateException("Parameter of type: " + type.getSort() + " are not supported");
+		case Type.BOOLEAN -> toPrimitive(Boolean.class, "booleanValue", insn, desc);
+		case Type.CHAR -> toPrimitive(Character.class, "charValue", insn, desc);
+		case Type.BYTE -> toPrimitive(Byte.class, "byteValue", insn, desc);
+		case Type.SHORT -> toPrimitive(Short.class, "shortValue", insn, desc);
+		case Type.INT -> toPrimitive(Integer.class, "intValue", insn, desc);
+		case Type.FLOAT -> toPrimitive(Float.class, "floatValue", insn, desc);
+		case Type.LONG -> toPrimitive(Long.class, "longValue", insn, desc);
+		case Type.DOUBLE -> toPrimitive(Double.class, "doubleValue", insn, desc);
+		case Type.ARRAY, Type.OBJECT -> insn.add(new TypeInsnNode(CHECKCAST, type.getInternalName()));
+		case Type.METHOD -> throw new IllegalStateException("Methods are not supported yet!");
+		default -> throw new IllegalStateException("Parameter of type: " + type.getSort() + " are not supported");
 		}
 	}
 	

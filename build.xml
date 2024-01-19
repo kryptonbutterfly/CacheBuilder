@@ -9,7 +9,7 @@
 		<jar destfile="${jarfile}" filesetmanifest="mergewithoutmain">
 			<manifest>
 				<attribute name="Main-Class" value="org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader"/>
-				<attribute name="Rsrc-Main-Class" value="de.tinycodecrank.asm.cache.DecoratorCache"/>
+				<attribute name="Rsrc-Main-Class" value="kryptonbutterfly.asm.cache.DecoratorCache"/>
 				<attribute name="Class-Path" value="."/>
 				<attribute name="Rsrc-Class-Path" value="./ asm-9.2.jar asm-tree-9.2.jar"/>
 				<!-- <attribute name="Can-Redefine-Classes" value="true"/>

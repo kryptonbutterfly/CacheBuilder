@@ -1,13 +1,13 @@
-# CacheBuilder [![Maven Package](https://github.com/tinycodecrank/CacheBuilder/actions/workflows/maven-publish.yml/badge.svg)](https://github.com/tinycodecrank/CacheBuilder/actions/workflows/maven-publish.yml)
+# CacheBuilder [![Maven Package](https://github.com/kryptonbutterfly/CacheBuilder/actions/workflows/maven-publish.yml/badge.svg)](https://github.com/kryptonbutterfly/CacheBuilder/actions/workflows/maven-publish.yml)
 
-ByteCode manipulator used to decorate methods using **[@Cache](https://github.com/tinycodecrank/tinyCache)** annotations.
+ByteCode manipulator used to decorate methods using **[@Cache](https://github.com/kryptonbutterfly/tinyCache)** annotations.
 
 ## Getting the latest release
 
 ```xml
 <repository>
   <id>github</id>
-  <url>https://maven.pkg.github.com/tinycodecrank/maven-repo</url>
+  <url>https://maven.pkg.github.com/kryptonbutterfly/maven-repo</url>
 </repository>
 ```
 ```xml
@@ -22,8 +22,8 @@ ByteCode manipulator used to decorate methods using **[@Cache](https://github.co
 
 java version | library version | Download
 :----------: | :-------------: | :-------
-18+          | 1.1.0           | [CacheBuilder.zip](https://github.com/tinycodecrank/CacheBuilder/releases/download/v1.1.0/CacheBuilder.zip)</br>[CacheBuilder.tar.gz](https://github.com/tinycodecrank/CacheBuilder/releases/download/v1.1.0/CacheBuilder.tar.gz)
-18+          | 1.0.0           | [CacheASM.zip](https://github.com/tinycodecrank/CacheBuilder/releases/download/v1.0.0/CacheASM.zip)
+18+          | 1.1.0           | [CacheBuilder.zip](https://github.com/kryptonbutterfly/CacheBuilder/releases/download/v1.1.0/CacheBuilder.zip)</br>[CacheBuilder.tar.gz](https://github.com/kryptonbutterfly/CacheBuilder/releases/download/v1.1.0/CacheBuilder.tar.gz)
+18+          | 1.0.0           | [CacheASM.zip](https://github.com/kryptonbutterfly/CacheBuilder/releases/download/v1.0.0/CacheASM.zip)
 
 ## Install
 

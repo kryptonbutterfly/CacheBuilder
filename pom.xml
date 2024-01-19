@@ -1,16 +1,16 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>de.tinycodecrank</groupId>
+	<groupId>kryptonbutterfly</groupId>
 	<artifactId>cache_builder</artifactId>
-	<version>1.1.0</version>
+	<version>2.0.0</version>
 	<name>CacheBuilder</name>
 	<description>A java bytecode manipulator to decorate annotated functions with a specified cache</description>
 	
 	<distributionManagement>
 		<repository>
 			<id>github</id>
-			<name>GitHub tinycodecrank Apache Maven Packages</name>
-			<url>https://maven.pkg.github.com/tinycodecrank/maven-repo</url>
+			<name>GitHub kryptonbutterfly Apache Maven Packages</name>
+			<url>https://maven.pkg.github.com/kryptonbutterfly/maven-repo</url>
 		</repository>
 	</distributionManagement>
 	
@@ -23,25 +23,20 @@
 	<repositories>
 		<repository>
 			<id>github</id>
-			<url>https://maven.pkg.github.com/tinycodecrank/maven-repo</url>
+			<url>https://maven.pkg.github.com/kryptonbutterfly/maven-repo</url>
 		</repository>
 	</repositories>
 	
 	<dependencies>
 		<dependency>
-			<groupId>de.tinycodecrank</groupId>
+			<groupId>kryptonbutterfly</groupId>
 			<artifactId>tiny_cache</artifactId>
-			<version>1.0.0</version>
+			<version>2.0.0</version>
 		</dependency>
 		<dependency>
-			<groupId>de.tinycodecrank</groupId>
+			<groupId>kryptonbutterfly</groupId>
 			<artifactId>tiny_system_utils</artifactId>
-			<version>1.0.0</version>
-		</dependency>
-		<dependency>
-			<groupId>org.ow2.asm</groupId>
-			<artifactId>asm</artifactId>
-			<version>9.6</version>
+			<version>2.0.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.ow2.asm</groupId>
@@ -87,7 +82,7 @@
 					<archive>
 						<manifest>
 							<addClasspath>false</addClasspath>
-							<mainClass>de.tinycodecrank.asm.cache.DecoratorCache</mainClass>
+							<mainClass>kryptonbutterfly.asm.cache.DecoratorCache</mainClass>
 						</manifest>
 					</archive>
 				</configuration>
@@ -105,7 +100,7 @@
 							<minimizeJar>true</minimizeJar>
 							<createDependencyReducedPom>false</createDependencyReducedPom>
 							<entryPoints>
-								<entryPoint>de.tinycodecrank.asm.cache.DecoratorCache</entryPoint>
+								<entryPoint>kryptonbutterfly.asm.cache.DecoratorCache</entryPoint>
 							</entryPoints>
 							<outputFile>${project.build.directory}/${project.artifactId}-${project.version}.jar</outputFile>
 						</configuration>
