@@ -1,6 +1,10 @@
+<img width="82" align="left" src="https://raw.githubusercontent.com/kryptonbutterfly/CacheBuilder/master/icon.svg">
+
 # CacheBuilder [![Maven Package](https://github.com/kryptonbutterfly/CacheBuilder/actions/workflows/maven-publish.yml/badge.svg)](https://github.com/kryptonbutterfly/CacheBuilder/actions/workflows/maven-publish.yml)
 
 ByteCode manipulator used to decorate methods using **[@Cache](https://github.com/kryptonbutterfly/tinyCache)** annotations.
+
+It can be used as a build target in your ide or as a maven plugin (requires version 3.0.0 or higher).
 
 ## Getting the latest release
 
@@ -14,14 +18,47 @@ ByteCode manipulator used to decorate methods using **[@Cache](https://github.co
 <dependency>
   <groupId>kryptonbutterfly</groupId>
   <artifactId>cache_builder</artifactId>
-  <version>2.0.0</version>
+  <version>3.0.0</version>
 </dependency>
 ```
+
+### Configure as maven plugin
+
+```xml
+<build>
+  …
+  <plugins>
+    …
+    <plugin>
+      <groupId>kryptonbutterfly</groupId>
+      <artifactId>cache_builder</artifactId>
+      <executions>
+        <execution>
+          <phase>process-classes</phase>
+          <goals>
+            <goal>decorate</goal>
+          </goals>
+          <configuration>
+            <!-- Optional: 'target/classes' is the default value -->
+            <project.builder.outputDirectory>target/classes</project.builder.outputDirectory>
+            <!-- Optional: '.class' is the default value -->
+            <classFileExtension>.class</classFileExtension>
+          </configuration>
+        </execution>
+      </executions>
+    </plugin>
+    …
+  </plugins>
+  …
+</build>
+```
+
 
 ## Download
 
 java version | library version | Download
 :----------: | :-------------: | :-------
+18+          | 3.0.0           | [cacheb_builder-3.0.0.jar](https://github.com/kryptonbutterfly/CacheBuilder/releases/download/v3.0.0/cache_builder-3.0.0.jar)</br>[cache_builder-3.0.0-setup.zip](https://github.com/kryptonbutterfly/CacheBuilder/releases/download/v3.0.0/cache_builder-3.0.0-setup.zip)</br>[cache_builder-3.0.0-setup.targ.gz](https://github.com/kryptonbutterfly/CacheBuilder/releases/download/v3.0.0/cache_builder-3.0.0-setup.tar.gz)
 18+          | 2.0.0           | [cache_builder-2.0.0-setup.zip](https://github-registry-files.githubusercontent.com/731108692/2ff3ba00-b6b2-11ee-9145-07a6201d0f00?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAVCODYLSA53PQK4ZA%2F20240119%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20240119T090910Z&X-Amz-Expires=300&X-Amz-Signature=38c39e8068ae7b1b73d3190fccb25d32b1a25095c9ab7ab9f2b18002991609d6&X-Amz-SignedHeaders=host&actor_id=0&key_id=0&repo_id=731108692&response-content-disposition=filename%3Dcache_builder-2.0.0-setup.zip&response-content-type=application%2Foctet-stream)</br>[cache_builder-2.0.0-setup.tar.gz](https://github-registry-files.githubusercontent.com/731108692/3124e700-b6b2-11ee-8dc8-e84e0ff6435e?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAVCODYLSA53PQK4ZA%2F20240119%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20240119T090910Z&X-Amz-Expires=300&X-Amz-Signature=63d67b14958b5c319ce7fc54b0cfbd748d52d7870e61005a87dfff3734011279&X-Amz-SignedHeaders=host&actor_id=0&key_id=0&repo_id=731108692&response-content-disposition=filename%3Dcache_builder-2.0.0-setup.tar.gz&response-content-type=application%2Foctet-stream)
 18+          | 1.1.0           | [CacheBuilder.zip](https://github.com/kryptonbutterfly/CacheBuilder/releases/download/v1.1.0/CacheBuilder.zip)</br>[CacheBuilder.tar.gz](https://github.com/kryptonbutterfly/CacheBuilder/releases/download/v1.1.0/CacheBuilder.tar.gz)
 18+          | 1.0.0           | [CacheASM.zip](https://github.com/kryptonbutterfly/CacheBuilder/releases/download/v1.0.0/CacheASM.zip)
@@ -40,7 +77,7 @@ extract **CacheASM.zip** in your <span style="color:#00aaee">**eclipse install d
 - click ![Import…](md/icons/mnImport.png)
 - select ![Run/Debug ➜ Launch Configuration](md/icons/Run_Debug-Launch_Configuration.png)
 - click ![Next >](md/icons/Next_>.png)
-- click ![Browse](md/icons/Browse.png)
+- click ![Browse…](md/icons/Browse.png)
 - navigate to <span style="color:#00aaee">**eclipse install directory**</span>**/builder/launch-configs**
   </br>!["eclipse install directory"/builder/launch-configs](md/icons/BrowseLaunchConfig.png)
 - click ![Open](md/icons/Open.png)
@@ -50,7 +87,7 @@ extract **CacheASM.zip** in your <span style="color:#00aaee">**eclipse install d
 
 ### Setup launch config as project builder
 - right click your project
-- select ![properties](md/icons/mnProperties.png)
+- select ![Properties](md/icons/mnProperties.png)
 - select ![Builders](md/icons/Builder.png)
 - click ![Import…](md/icons/btnImport.png)
 - select ![Cache](md/icons/chooseLaunchConfig.png)
