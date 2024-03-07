@@ -1,4 +1,4 @@
-package kryptonbutterfly.asm.cache;
+package kryptonbutterfly.asm.cache.misc;
 
 import static kryptonbutterfly.math.utils.range.Range.*;
 
@@ -24,19 +24,16 @@ import org.objectweb.asm.tree.VarInsnNode;
 import kryptonbutterfly.cache.CacheConstants;
 import kryptonbutterfly.monads.opt.Opt;
 
-public class ComponentWriter implements Opcodes
+public interface WriterUtils extends Opcodes
 {
-	static record CacheSpec(Type cacheType, int capacity)
-	{}
-	
-	static CacheSpec getCacheSpecFromAnnotation(AnnotationNode node) throws ClassNotFoundException
+	public static CacheSpec getCacheSpecFromAnnotation(AnnotationNode node) throws ClassNotFoundException
 	{
 		final var	cacheField		= "cache";
 		final var	capacityField	= "capacity";
 		var			cacheType		= Type.getType(CacheConstants.DEFAULT_CACHE);
 		int			capacity		= CacheConstants.DEFAULT_CAPACITY;
 		
-		for (int index : range(0, node.values.size(), 2))
+		for (final int index : range(0, node.values.size(), 2))
 		{
 			final var	name	= node.values.get(index);
 			final var	value	= node.values.get(index + 1);
@@ -62,7 +59,7 @@ public class ComponentWriter implements Opcodes
 		return new CacheSpec(cacheType, capacity);
 	}
 	
-	static MethodNode getOrCreateInitializer(ClassNode node, boolean isStatic)
+	public static MethodNode getOrCreateInitializer(ClassNode node, boolean isStatic)
 	{
 		final var	INIT		= isStatic ? "<clinit>" : "<init>";
 		final var	matches		= findMethod(node, INIT);
@@ -71,11 +68,11 @@ public class ComponentWriter implements Opcodes
 				: node.access & ACC_PUBLIC | node.access & ACC_PROTECTED | node.access & ACC_PRIVATE;
 		
 		return Opt.of(matches).filter(m -> !m.isEmpty()).map(m -> m.get(0)).get(() -> {
-			MethodNode init = new MethodNode((isStatic ? ACC_STATIC : 0) | visibility, INIT, "()V", null, null);
+			final var init = new MethodNode((isStatic ? ACC_STATIC : 0) | visibility, INIT, "()V", null, null);
 			node.methods.add(0, init);
 			if (!isStatic)
 			{
-				LocalVariableNode instance = new LocalVariableNode(
+				final var instance = new LocalVariableNode(
 					"this",
 					node.signature,
 					null,
@@ -107,7 +104,7 @@ public class ComponentWriter implements Opcodes
 			.get(ArrayList::new);
 	}
 	
-	static Opt<LocalVariableNode> findLocal(MethodNode node, String name)
+	public static Opt<LocalVariableNode> findLocal(MethodNode node, String name)
 	{
 		return Opt.of(node.localVariables)
 			.map(
@@ -117,12 +114,12 @@ public class ComponentWriter implements Opcodes
 			.flatmap(Opt::convert);
 	}
 	
-	static String toDesc(Class<?> clazz)
+	public static String getDesc(Class<?> clazz)
 	{
-		return toDesc(toInternal(clazz));
+		return getDesc(toInternal(clazz));
 	}
 	
-	static String toDesc(String name)
+	public static String getDesc(String name)
 	{
 		final var sb = new StringBuilder();
 		while (name.endsWith("[]"))
@@ -133,7 +130,7 @@ public class ComponentWriter implements Opcodes
 		return "%sL%s;".formatted(sb, name);
 	}
 	
-	static String toInternal(Class<?> clazz)
+	public static String toInternal(Class<?> clazz)
 	{
 		final var	name		= new StringBuilder(clazz.getPackageName()).append(".");
 		var			innerHost	= clazz;
@@ -151,25 +148,25 @@ public class ComponentWriter implements Opcodes
 		return clazz.replace('.', '/');
 	}
 	
-	static String fDesc(Object ret, Object... params)
+	public static String fDesc(Object ret, Object... params)
 	{
 		final Function<Object, String> toDescriptor = obj -> obj instanceof Class<?>
-			? toDesc((Class<?>) obj)
+			? getDesc((Class<?>) obj)
 				: (String) obj;
 		
-		StringBuilder sb = new StringBuilder("(");
+		final var sb = new StringBuilder("(");
 		Arrays.stream(params).map(toDescriptor).forEach(sb::append);
 		return sb.append(")").append(toDescriptor.apply(ret)).toString();
 	}
 	
-	static String generateUniqueMethodName(ClassNode node, String name)
+	public static String generateUniqueMethodName(ClassNode node, String name)
 	{
-		return generateUnique(ComponentWriter::isUniqueMethodName, node, name);
+		return generateUnique(WriterUtils::isUniqueMethodName, node, name);
 	}
 	
-	static String generateUniqueFieldName(ClassNode node, String name)
+	public static String generateUniqueFieldName(ClassNode node, String name)
 	{
-		return generateUnique(ComponentWriter::isUniqueFieldName, node, name);
+		return generateUnique(WriterUtils::isUniqueFieldName, node, name);
 	}
 	
 	private static String generateUnique(BiPredicate<ClassNode, String> unique, ClassNode node, String name)
@@ -192,7 +189,7 @@ public class ComponentWriter implements Opcodes
 		return node.fields == null || !node.fields.stream().map(m -> m.name).anyMatch(name::equals);
 	}
 	
-	static void addConvertToPrimitive(Type type, InsnList insn, LocalVariableNode element)
+	public static void addConvertToPrimitive(Type type, InsnList insn, LocalVariableNode element)
 	{
 		final var desc = fDesc(element.desc);
 		switch (type.getSort())
@@ -213,8 +210,13 @@ public class ComponentWriter implements Opcodes
 	
 	private static void toPrimitive(Class<?> clazz, String castMethod, InsnList instructions, String desc)
 	{
-		String owner = toInternal(clazz);
+		final String owner = toInternal(clazz);
 		instructions.add(new TypeInsnNode(CHECKCAST, owner));
 		instructions.add(new MethodInsnNode(INVOKEVIRTUAL, owner, castMethod, desc));
+	}
+	
+	public static boolean isStatic(int access)
+	{
+		return (access & ACC_STATIC) != 0;
 	}
 }
